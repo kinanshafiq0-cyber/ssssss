@@ -1,0 +1,1359 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نظام الحماية - <%= guild.name %></title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap');
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Tajawal', sans-serif;
+            background: #0a0a12;
+            color: #fff;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        /* ===== ANIMATED BG ===== */
+        .bg-particles {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; z-index: 0; overflow: hidden;
+        }
+        .bg-particles span {
+            position: absolute; display: block;
+            width: 4px; height: 4px; border-radius: 50%;
+            background: rgba(99,102,241,0.15);
+            animation: floatUp linear infinite;
+        }
+        .bg-particles span:nth-child(1) { left: 10%; animation-duration: 12s; animation-delay: 0s; width: 6px; height: 6px; }
+        .bg-particles span:nth-child(2) { left: 20%; animation-duration: 15s; animation-delay: 2s; background: rgba(168,85,247,0.12); }
+        .bg-particles span:nth-child(3) { left: 30%; animation-duration: 10s; animation-delay: 4s; width: 8px; height: 8px; }
+        .bg-particles span:nth-child(4) { left: 45%; animation-duration: 18s; animation-delay: 1s; background: rgba(236,72,153,0.1); }
+        .bg-particles span:nth-child(5) { left: 55%; animation-duration: 13s; animation-delay: 3s; }
+        .bg-particles span:nth-child(6) { left: 65%; animation-duration: 16s; animation-delay: 5s; width: 5px; height: 5px; background: rgba(99,102,241,0.1); }
+        .bg-particles span:nth-child(7) { left: 75%; animation-duration: 11s; animation-delay: 0s; }
+        .bg-particles span:nth-child(8) { left: 85%; animation-duration: 14s; animation-delay: 3s; width: 7px; height: 7px; background: rgba(168,85,247,0.15); }
+        .bg-particles span:nth-child(9) { left: 90%; animation-duration: 17s; animation-delay: 2s; }
+        .bg-particles span:nth-child(10) { left: 50%; animation-duration: 19s; animation-delay: 6s; background: rgba(236,72,153,0.08); }
+        @keyframes floatUp {
+            0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(-10vh) rotate(720deg); opacity: 0; }
+        }
+
+        .dashboard-wrapper { display: flex; flex-direction: row-reverse; min-height: 100vh; position: relative; z-index: 1; }
+        .systems-sidebar {
+            width: 340px; min-width: 340px;
+            background: linear-gradient(180deg, rgba(15,12,41,0.95) 0%, rgba(26,26,46,0.95) 100%);
+            backdrop-filter: blur(20px);
+            border-left: 1px solid rgba(255,255,255,0.06);
+            padding: 20px; overflow-y: auto; height: 100vh; position: sticky; top: 0;
+        }
+        .systems-sidebar .sidebar-header {
+            display: flex; align-items: center; justify-content: space-between;
+            margin-bottom: 20px; padding-bottom: 15px;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+        }
+        .systems-sidebar .sidebar-header .logo-shield {
+            display: flex; align-items: center; gap: 10px;
+        }
+        .systems-sidebar .sidebar-header .logo-shield .shield-icon {
+            width: 36px; height: 36px;
+            background: linear-gradient(135deg, #6366f1, #a855f7);
+            border-radius: 10px; display: flex; align-items: center; justify-content: center;
+            font-size: 18px; animation: glowPulse 3s ease-in-out infinite;
+        }
+        @keyframes glowPulse {
+            0%, 100% { box-shadow: 0 0 10px rgba(99,102,241,0.3); }
+            50% { box-shadow: 0 0 25px rgba(99,102,241,0.6), 0 0 40px rgba(168,85,247,0.3); }
+        }
+        .systems-sidebar .sidebar-header .logo-shield h3 { font-size: 15px; font-weight: 700; }
+        .systems-sidebar .sidebar-header .count {
+            font-size: 11px; color: rgba(255,255,255,0.4);
+            background: rgba(255,255,255,0.06); padding: 4px 10px; border-radius: 20px;
+        }
+        #searchSystem {
+            width: 100%; padding: 10px 14px; margin-bottom: 12px;
+            background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 10px; color: #fff; font-family: 'Tajawal', sans-serif; font-size: 13px;
+            outline: none; transition: all 0.3s;
+        }
+        #searchSystem:focus { border-color: rgba(99,102,241,0.5); box-shadow: 0 0 20px rgba(99,102,241,0.1); }
+        #searchSystem::placeholder { color: rgba(255,255,255,0.3); }
+        .system-item {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 10px 12px; border-radius: 10px; margin-bottom: 2px;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer;
+            border: 1px solid transparent; position: relative; overflow: hidden;
+        }
+        .system-item::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(99,102,241,0.05), transparent);
+            transform: translateX(-100%); transition: transform 0.6s;
+        }
+        .system-item:hover::before { transform: translateX(100%); }
+        .system-item:hover { background: rgba(255,255,255,0.04); transform: translateX(-4px); }
+        .system-item.active {
+            background: rgba(99,102,241,0.15); border-color: rgba(99,102,241,0.3);
+            box-shadow: 0 0 20px rgba(99,102,241,0.1);
+            transform: translateX(-4px);
+        }
+        .system-item .sys-info { display: flex; align-items: center; gap: 10px; }
+        .system-item .sys-info .icon { font-size: 16px; transition: transform 0.3s; }
+        .system-item:hover .sys-info .icon { transform: scale(1.2); }
+        .system-item .sys-info .name { font-size: 13px; font-weight: 500; }
+        .system-item .sys-info .badge {
+            font-size: 10px; padding: 2px 8px; border-radius: 10px;
+            transition: all 0.3s;
+        }
+        .system-item .sys-info .badge.enabled { background: rgba(34,197,94,0.2); color: #4ade80; }
+        .system-item .sys-info .badge.disabled { background: rgba(239,68,68,0.15); color: #f87171; }
+        .toggle {
+            position: relative; width: 44px; height: 24px; cursor: pointer;
+        }
+        .toggle input { opacity: 0; width: 0; height: 0; }
+        .toggle .slider {
+            position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(255,255,255,0.1); border-radius: 12px; transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .toggle .slider::before {
+            content: ''; position: absolute; width: 18px; height: 18px;
+            border-radius: 50%; background: #fff; top: 3px; right: 3px;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .toggle input:checked + .slider { background: linear-gradient(135deg, #6366f1, #a855f7); box-shadow: 0 0 15px rgba(99,102,241,0.3); }
+        .toggle input:checked + .slider::before { transform: translateX(-20px); }
+
+        .main-panel { flex: 1; padding: 30px; overflow-y: auto; }
+
+        .server-header-card {
+            background: linear-gradient(135deg, rgba(99,102,241,0.12), rgba(168,85,247,0.12));
+            border: 1px solid rgba(255,255,255,0.06); border-radius: 20px;
+            padding: 30px; margin-bottom: 25px;
+            display: flex; align-items: center; gap: 25px;
+            position: relative; overflow: hidden;
+            animation: slideDown 0.6s ease-out;
+        }
+        .server-header-card::after {
+            content: ''; position: absolute; top: -50%; right: -20%;
+            width: 300px; height: 300px;
+            background: radial-gradient(circle, rgba(99,102,241,0.08), transparent 70%);
+            animation: rotateGlow 8s linear infinite;
+        }
+        @keyframes rotateGlow {
+            0% { transform: rotate(0deg) scale(1); }
+            50% { transform: rotate(180deg) scale(1.2); }
+            100% { transform: rotate(360deg) scale(1); }
+        }
+        @keyframes slideDown {
+            0% { opacity: 0; transform: translateY(-30px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+        .server-header-card .icon {
+            width: 80px; height: 80px; border-radius: 16px;
+            background: linear-gradient(135deg, #6366f1, #a855f7);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 32px; font-weight: 700; object-fit: cover;
+            position: relative; z-index: 1;
+        }
+        .server-header-card .icon img { width: 100%; height: 100%; border-radius: 16px; object-fit: cover; }
+        .server-header-card .info { position: relative; z-index: 1; }
+        .server-header-card .info h1 { font-size: 24px; font-weight: 900; }
+        .server-header-card .info p { color: rgba(255,255,255,0.5); font-size: 14px; }
+        .server-header-card .quick-stats { display: flex; gap: 20px; margin-right: auto; position: relative; z-index: 1; }
+        .server-header-card .quick-stats .qs {
+            text-align: center; background: rgba(255,255,255,0.04);
+            padding: 10px 20px; border-radius: 12px;
+            transition: all 0.3s; cursor: default;
+        }
+        .server-header-card .quick-stats .qs:hover { background: rgba(255,255,255,0.08); transform: translateY(-2px); }
+        .server-header-card .quick-stats .qs .num { font-size: 20px; font-weight: 900; color: #6366f1; }
+        .server-header-card .quick-stats .qs .label { font-size: 11px; color: rgba(255,255,255,0.4); }
+
+        .section {
+            background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 16px; padding: 20px; margin-bottom: 20px;
+            animation: fadeUp 0.5s ease-out;
+        }
+        @keyframes fadeUp {
+            0% { opacity: 0; transform: translateY(20px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+        .section h2 {
+            font-size: 16px; font-weight: 700; margin-bottom: 15px;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .section .quick-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+        .section .quick-actions button {
+            padding: 10px 20px; border: none; border-radius: 10px;
+            font-family: 'Tajawal', sans-serif; font-size: 13px; font-weight: 600;
+            cursor: pointer; transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative; overflow: hidden;
+        }
+        .section .quick-actions button::after {
+            content: ''; position: absolute; top: 50%; left: 50%;
+            width: 0; height: 0; border-radius: 50%;
+            background: rgba(255,255,255,0.2);
+            transition: width 0.6s, height 0.6s, top 0.6s, left 0.6s;
+        }
+        .section .quick-actions button:active::after {
+            width: 300px; height: 300px; top: -100px; left: -100px;
+        }
+        .btn-enable-all { background: linear-gradient(135deg, #22c55e, #16a34a); color: #fff; }
+        .btn-enable-all:hover { box-shadow: 0 5px 20px rgba(34,197,94,0.3); transform: translateY(-2px); }
+        .btn-disable-all { background: linear-gradient(135deg, #ef4444, #dc2626); color: #fff; }
+        .btn-disable-all:hover { box-shadow: 0 5px 20px rgba(239,68,68,0.3); transform: translateY(-2px); }
+        .btn-beast {
+            background: linear-gradient(135deg, #dc2626, #7c3aed);
+            color: #fff; animation: beastPulse 2s ease-in-out infinite;
+        }
+        .btn-beast:hover { box-shadow: 0 5px 25px rgba(220,38,38,0.5); transform: translateY(-2px); }
+        @keyframes beastPulse {
+            0%, 100% { box-shadow: 0 0 10px rgba(220,38,38,0.3); }
+            50% { box-shadow: 0 0 25px rgba(220,38,38,0.6), 0 0 50px rgba(124,58,237,0.3); }
+        }
+        .btn-backup { background: linear-gradient(135deg, #6366f1, #a855f7); color: #fff; }
+        .btn-backup:hover { box-shadow: 0 5px 20px rgba(99,102,241,0.3); transform: translateY(-2px); }
+
+        #settingsPanel {
+            display: none;
+            background: rgba(255,255,255,0.02); border: 1px solid rgba(99,102,241,0.2);
+            border-radius: 16px; padding: 25px; margin-bottom: 20px;
+            animation: fadeUp 0.4s ease-out;
+        }
+        #settingsPanel.visible { display: block; }
+        #settingsPanel .panel-header {
+            display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;
+        }
+        #settingsPanel .panel-header h2 { font-size: 18px; font-weight: 700; }
+        #settingsPanel .panel-header .close-btn {
+            background: rgba(239,68,68,0.15); border: none; color: #f87171;
+            width: 32px; height: 32px; border-radius: 8px; cursor: pointer; font-size: 16px;
+            transition: all 0.3s;
+        }
+        #settingsPanel .panel-header .close-btn:hover { background: rgba(239,68,68,0.3); transform: rotate(90deg); }
+
+        .setting-group {
+            background: rgba(255,255,255,0.03); border-radius: 12px;
+            padding: 16px; margin-bottom: 12px;
+            transition: all 0.3s;
+        }
+        .setting-group:hover { background: rgba(255,255,255,0.05); }
+        .setting-group label {
+            display: block; font-size: 13px; font-weight: 500;
+            color: rgba(255,255,255,0.7); margin-bottom: 6px;
+        }
+        .setting-group .desc {
+            font-size: 11px; color: rgba(255,255,255,0.3); margin-bottom: 8px;
+        }
+        .setting-group input, .setting-group select {
+            width: 100%; padding: 10px 14px;
+            background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 10px; color: #fff;
+            font-family: 'Tajawal', sans-serif; font-size: 13px; outline: none;
+            transition: all 0.3s;
+        }
+        .setting-group select option { background: #1a1a2e; color: #fff; }
+        .setting-group input:focus, .setting-group select:focus {
+            border-color: rgba(99,102,241,0.5); background: rgba(255,255,255,0.08);
+            box-shadow: 0 0 20px rgba(99,102,241,0.1);
+        }
+        .setting-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .btn-save {
+            width: 100%; padding: 12px;
+            background: linear-gradient(135deg, #6366f1, #a855f7);
+            border: none; border-radius: 10px; color: #fff;
+            font-family: 'Tajawal', sans-serif; font-size: 14px; font-weight: 700;
+            cursor: pointer; transition: all 0.4s; margin-top: 10px;
+        }
+        .btn-save:hover { box-shadow: 0 5px 20px rgba(99,102,241,0.4); transform: translateY(-2px); }
+
+        .exempt-role-tag {
+            display:inline-flex; align-items:center; gap:4px;
+            padding:5px 10px; border-radius:8px; font-size:12px; font-weight:500;
+            background:rgba(99,102,241,0.12); border:1px solid rgba(99,102,241,0.2);
+            transition:all 0.3s; animation: fadeUp 0.3s;
+        }
+        .exempt-role-tag:hover { background:rgba(99,102,241,0.2); }
+        .exempt-role-tag .remove-role:hover { opacity:1 !important; color:#f87171; }
+
+        .logs-container { max-height: 250px; overflow-y: auto; }
+        .log-entry {
+            padding: 8px 12px; border-radius: 8px; margin-bottom: 4px;
+            font-size: 12px; background: rgba(255,255,255,0.02);
+            display: flex; justify-content: space-between; align-items: center;
+            transition: all 0.3s;
+        }
+        .log-entry:hover { background: rgba(255,255,255,0.05); }
+        .log-entry .log-time { color: rgba(255,255,255,0.3); font-size: 11px; }
+        .log-entry .log-action { color: #6366f1; font-weight: 500; }
+        .log-entry.log-punish { border-right: 3px solid #ef4444; }
+        .log-entry.log-danger { border-right: 3px solid #dc2626; background: rgba(220,38,38,0.06); }
+        .no-logs { color: rgba(255,255,255,0.3); font-size: 13px; text-align: center; padding: 20px; }
+        .live-active { animation: livePulse 2s ease-in-out infinite !important; color: #4ade80 !important; }
+        @keyframes livePulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+        .log-new {
+            animation: logSlideIn 0.5s ease-out;
+        }
+        @keyframes logSlideIn {
+            0% { opacity: 0; transform: translateX(-20px); }
+            100% { opacity: 1; transform: translateX(0); }
+        }
+
+        /* ===== CUSTOM MODAL ===== */
+        .modal-overlay {
+            display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.7); backdrop-filter: blur(8px);
+            z-index: 99999; align-items: center; justify-content: center;
+            animation: fadeIn 0.3s;
+        }
+        .modal-overlay.show { display: flex; }
+        @keyframes fadeIn {
+            0% { opacity: 0; }
+            100% { opacity: 1; }
+        }
+        .modal-box {
+            background: linear-gradient(135deg, #1a1a2e, #0f0c29);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 24px; padding: 35px; width: 480px; max-width: 90%;
+            box-shadow: 0 30px 80px rgba(0,0,0,0.5);
+            animation: modalPop 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative; overflow: hidden;
+        }
+        .modal-box::before {
+            content: ''; position: absolute; top: -2px; left: -2px; right: -2px; bottom: -2px;
+            background: linear-gradient(45deg, rgba(99,102,241,0.3), rgba(168,85,247,0.3), rgba(236,72,153,0.3));
+            border-radius: 25px; z-index: -1; opacity: 0.5; filter: blur(8px);
+        }
+        @keyframes modalPop {
+            0% { opacity: 0; transform: scale(0.8) translateY(20px); }
+            100% { opacity: 1; transform: scale(1) translateY(0); }
+        }
+        .modal-box .modal-icon { font-size: 50px; text-align: center; margin-bottom: 15px; }
+        .modal-box .modal-icon.warning { animation: shakeIcon 0.5s; }
+        @keyframes shakeIcon {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(-10deg); }
+            75% { transform: rotate(10deg); }
+        }
+        .modal-box h2 { font-size: 20px; font-weight: 900; text-align: center; margin-bottom: 8px; }
+        .modal-box p { color: rgba(255,255,255,0.6); font-size: 14px; text-align: center; margin-bottom: 10px; line-height: 1.8; }
+        .modal-box .modal-details {
+            background: rgba(255,255,255,0.03); border-radius: 12px;
+            padding: 15px; margin: 15px 0; font-size: 13px; line-height: 2;
+            max-height: 200px; overflow-y: auto;
+        }
+        .modal-box .modal-details div { display: flex; justify-content: space-between; }
+        .modal-box .modal-details .danger { color: #f87171; }
+        .modal-box .modal-details .medium { color: #facc15; }
+        .modal-box .modal-details .safe { color: #4ade80; }
+        .modal-box .modal-actions { display: flex; gap: 10px; margin-top: 20px; }
+        .modal-box .modal-actions button {
+            flex: 1; padding: 12px; border: none; border-radius: 12px;
+            font-family: 'Tajawal', sans-serif; font-size: 14px; font-weight: 700;
+            cursor: pointer; transition: all 0.3s;
+        }
+        .modal-box .modal-actions .btn-confirm {
+            background: linear-gradient(135deg, #dc2626, #7c3aed); color: #fff;
+        }
+        .modal-box .modal-actions .btn-confirm:hover { box-shadow: 0 5px 20px rgba(220,38,38,0.4); transform: translateY(-2px); }
+        .modal-box .modal-actions .btn-cancel {
+            background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.7);
+        }
+        .modal-box .modal-actions .btn-cancel:hover { background: rgba(255,255,255,0.1); }
+
+        .toast {
+            position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
+            background: rgba(34,197,94,0.9); backdrop-filter: blur(10px);
+            color: #fff; padding: 14px 28px;
+            border-radius: 14px; font-family: 'Tajawal', sans-serif; font-size: 14px;
+            z-index: 999999; display: none; box-shadow: 0 10px 40px rgba(34,197,94,0.3);
+            animation: toastIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .toast.error { background: rgba(239,68,68,0.9); box-shadow: 0 10px 40px rgba(239,68,68,0.3); }
+        .toast.beast { background: linear-gradient(135deg, #dc2626, #7c3aed); box-shadow: 0 10px 40px rgba(220,38,38,0.4); }
+        @keyframes toastIn {
+            0% { opacity: 0; transform: translateX(-50%) translateY(30px) scale(0.9); }
+            100% { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
+        }
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
+        .pill { display: inline-block; padding: 2px 10px; border-radius: 12px; font-size: 11px; margin-left: 6px; }
+        .pill.bg-green { background: rgba(34,197,94,0.2); color: #4ade80; }
+        .pill.bg-red { background: rgba(239,68,68,0.15); color: #f87171; }
+        .pill.bg-yellow { background: rgba(234,179,8,0.15); color: #facc15; }
+        .pill.bg-blue { background: rgba(99,102,241,0.15); color: #818cf8; }
+
+        .nav-bar {
+            display: flex; align-items: center; gap: 10px;
+            margin-bottom: 20px; font-size: 14px;
+        }
+        .nav-bar a {
+            color: rgba(255,255,255,0.4); text-decoration: none;
+            transition: all 0.3s;
+        }
+        .nav-bar a:hover { color: #6366f1; }
+        .nav-bar .sep { color: rgba(255,255,255,0.2); }
+        .nav-bar .current { color: rgba(255,255,255,0.8); font-weight: 500; }
+        .nav-bar .home-btn {
+            display: flex; align-items: center; gap: 6px;
+            padding: 6px 14px; background: rgba(255,255,255,0.04);
+            border-radius: 8px; font-size: 13px;
+        }
+        .nav-bar .home-btn:hover { background: rgba(99,102,241,0.15); color: #818cf8; }
+        .nav-bar .discord-btn-nav {
+            display: flex; align-items: center; gap: 6px;
+            padding: 6px 14px; background: rgba(88,101,242,0.12);
+            border-radius: 8px; font-size: 13px; color: #8b9cf7;
+            text-decoration: none; transition: all 0.3s;
+        }
+        .nav-bar .discord-btn-nav:hover { background: rgba(88,101,242,0.25); color: #a5b4fc; }
+        .toast-discord {
+            position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
+            background: rgba(88,101,242,0.95); backdrop-filter: blur(10px);
+            color: #fff; padding: 14px 28px;
+            border-radius: 14px; font-family: 'Tajawal', sans-serif; font-size: 14px;
+            z-index: 999999; display: none; box-shadow: 0 10px 40px rgba(88,101,242,0.3);
+            animation: toastIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-particles">
+        <span></span><span></span><span></span><span></span><span></span>
+        <span></span><span></span><span></span><span></span><span></span>
+    </div>
+
+    <div class="toast" id="toast"></div>
+    <div class="toast-discord" id="discordToast">💬 يتم تحويلك إلى سيرفر الدعم...</div>
+
+    <!-- ===== CUSTOM MODAL ===== -->
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal-box" id="modalBox">
+            <div class="modal-icon" id="modalIcon">👹</div>
+            <h2 id="modalTitle">تأكيد</h2>
+            <p id="modalDesc">هل أنت متأكد؟</p>
+            <div class="modal-details" id="modalDetails" style="display:none;"></div>
+            <div class="modal-actions">
+                <button class="btn-cancel" onclick="closeModal()">إلغاء</button>
+                <button class="btn-confirm" id="modalConfirm">تأكيد</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="dashboard-wrapper">
+        <div class="systems-sidebar">
+            <div class="sidebar-header">
+                <div class="logo-shield">
+                    <div class="shield-icon">🛡️</div>
+                    <h3>أنظمة الحماية</h3>
+                </div>
+                <span class="count" id="activeCount">0/30</span>
+            </div>
+            <input type="text" id="searchSystem" placeholder="🔍 ابحث عن نظام..." oninput="filterSystems(this.value)">
+            <div id="systemsList">
+                <%
+                const systems = [
+                    { key: 'antiRaid', icon: '⚔️', name: 'منع الهجمات الجماعية' },
+                    { key: 'antiSpam', icon: '📨', name: 'منع السبام' },
+                    { key: 'antiLink', icon: '🔗', name: 'منع الروابط' },
+                    { key: 'antiBot', icon: '🤖', name: 'منع البوتات' },
+                    { key: 'antiSelfbot', icon: '👤', name: 'منع السيلف بوت' },
+                    { key: 'antiWebhook', icon: '🪝', name: 'منع الويهوك' },
+                    { key: 'antiNickname', icon: '✏️', name: 'حماية الاختصار' },
+                    { key: 'antiChannelDelete', icon: '🗑️', name: 'حماية الرومات' },
+                    { key: 'antiChannelCreate', icon: '➕', name: 'منع الرومات الجديدة' },
+                    { key: 'antiRoleDelete', icon: '🎭', name: 'حماية الرتب' },
+                    { key: 'antiRoleCreate', icon: '✨', name: 'منع الرتب الجديدة' },
+                    { key: 'antiBan', icon: '🔨', name: 'منع الحظر' },
+                    { key: 'antiKick', icon: '👢', name: 'منع الطرد' },
+                    { key: 'antiPrune', icon: '✂️', name: 'منع التنظيف' },
+                    { key: 'antiEmojiDelete', icon: '😭', name: 'حماية الإيموجي' },
+                    { key: 'antiEmojiCreate', icon: '😊', name: 'منع الإيموجي' },
+                    { key: 'antiStickerDelete', icon: '🏷️', name: 'حماية الملصقات' },
+                    { key: 'antiStickerCreate', icon: '📝', name: 'منع الملصقات' },
+                    { key: 'antiIntegration', icon: '🔌', name: 'حماية التكاملات' },
+                    { key: 'antiVanity', icon: '💫', name: 'حماية الرابط' },
+                    { key: 'antiAlts', icon: '👶', name: 'منع الحسابات الوهمية' },
+                    { key: 'antiToxic', icon: '☣️', name: 'منع الكلمات المسيئة' },
+                    { key: 'antiCapslock', icon: '🔠', name: 'منع الأحرف الكبيرة' },
+                    { key: 'antiMassMention', icon: '📢', name: 'منع المنشن الجماعي' },
+                    { key: 'antiFlood', icon: '🌊', name: 'منع التكرار' },
+                    { key: 'antiInvite', icon: '📩', name: 'منع الدعوات' },
+                    { key: 'antiGhostPing', icon: '👻', name: 'منع الشبح' },
+                    { key: 'antiMassBan', icon: '💥', name: 'منع الحظر الجماعي' },
+                    { key: 'antiMassKick', icon: '🦵', name: 'منع الطرد الجماعي' },
+                    { key: 'antiPermissionGuard', icon: '🔐', name: 'حراسة الصلاحيات' }
+                ];
+                const punishmentMap = { warn: 'تحذير', timeout: 'كتم', kick: 'طرد', ban: 'حظر', removeRoles: 'سحب رتب', mute: 'إسكات' };
+                systems.forEach(sys => {
+                    const enabled = settings[sys.key]?.enabled === true;
+                %>
+                <div class="system-item" data-system="<%= sys.key %>" onclick="selectSystem('<%= sys.key %>')">
+                    <div class="sys-info">
+                        <span class="icon"><%= sys.icon %></span>
+                        <span class="name"><%= sys.name %></span>
+                        <span class="badge <%= enabled ? 'enabled' : 'disabled' %>" id="badge_<%= sys.key %>"><%= enabled ? 'ON' : 'OFF' %></span>
+                    </div>
+                    <label class="toggle" onclick="event.stopPropagation()">
+                        <input type="checkbox" <%= enabled ? 'checked' : '' %> onchange="toggleSystem('<%= sys.key %>', this.checked)" id="cb_<%= sys.key %>">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <% }) %>
+            </div>
+        </div>
+
+        <div class="main-panel">
+            <div class="nav-bar">
+                <a href="/" class="home-btn">🏠 الرئيسية</a>
+                <span class="sep">/</span>
+                <span class="current">🔧 <%= guild.name %></span>
+                <div style="flex:1;"></div>
+                <a href="<%= discordInvite %>" target="_blank" class="discord-btn-nav" onclick="showDiscordToast(event)">💬 الدعم الفني</a>
+            </div>
+
+            <div class="server-header-card">
+                <div class="icon">
+                    <% if (guild.icon) { %>
+                        <img src="<%= guild.icon %>" alt="<%= guild.name %>">
+                    <% } else { %>
+                        <%= guild.name.charAt(0) %>
+                    <% } %>
+                </div>
+                <div class="info">
+                    <h1><%= guild.name %></h1>
+                    <p>🆔 <%= guild.id %> • 👥 <%= guild.memberCount.toLocaleString() %> عضو</p>
+                </div>
+                <div class="quick-stats">
+                    <div class="qs">
+                        <div class="num" id="totalOn">0</div>
+                        <div class="label">نشط</div>
+                    </div>
+                    <div class="qs">
+                        <div class="num"><%= backup.channels.length %></div>
+                        <div class="label">روم</div>
+                    </div>
+                    <div class="qs">
+                        <div class="num"><%= backup.roles.length %></div>
+                        <div class="label">رتبة</div>
+                    </div>
+                    <div class="qs">
+                        <div class="num" id="totalLogs"><%= logs.length %></div>
+                        <div class="label">حدث</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>⚡ إجراءات سريعة</h2>
+                <div class="quick-actions">
+                    <button class="btn-enable-all" onclick="toggleAll(true)">🔒 تفعيل الكل</button>
+                    <button class="btn-disable-all" onclick="toggleAll(false)">🔓 إيقاف الكل</button>
+                    <button class="btn-beast" onclick="showBeastModal()">👹 نظام الوحش</button>
+                    <button class="btn-backup" onclick="createBackup()">💾 نسخ احتياطي</button>
+                </div>
+                <div id="beastInfo" style="display:none;margin-top:12px;padding:12px 16px;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.2);border-radius:10px;font-size:13px;color:#fca5a5;animation:fadeUp 0.4s;">
+                    <div style="display:flex;align-items:center;justify-content:space-between;">
+                        <span>👹 <strong>نظام الوحش مفعل!</strong> - أي حركة تخريبية = حظر فوري 🚨</span>
+                        <button onclick="stopBeastMode()" style="padding:6px 18px;background:rgba(239,68,68,0.2);border:1px solid rgba(239,68,68,0.3);border-radius:8px;color:#fca5a5;font-family:'Tajawal',sans-serif;font-size:12px;font-weight:600;cursor:pointer;transition:all 0.3s;" onmouseover="this.style.background='rgba(239,68,68,0.3)'" onmouseout="this.style.background='rgba(239,68,68,0.2)'">⛔ إيقاف نظام الوحش</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>🛡️ الرتب المستثناة</h2>
+                <p style="color:rgba(255,255,255,0.5);font-size:12px;margin:-8px 0 12px;line-height:1.6;">
+                    الأعضاء في هذه الرتب ما راح يتأثرون بأي نظام حماية (يمنعون نهائياً)
+                </p>
+                <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;" id="exemptRolesContainer">
+                    <% const currentExempt = settings.exemptRoles || []; %>
+                    <% currentExempt.forEach(rid => { const role = guildRoles.find(r => r.id === rid); if(role){ %>
+                        <span class="exempt-role-tag" data-id="<%= role.id %>">
+                            <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:<%= role.color %>;margin-left:5px;"></span>
+                            <%= role.name %>
+                            <span class="remove-role" onclick="removeExemptRole('<%= role.id %>')" style="cursor:pointer;margin-right:6px;opacity:0.6;">✕</span>
+                        </span>
+                    <% }}); %>
+                </div>
+                <div style="display:flex;gap:8px;">
+                    <select id="exemptRoleSelect" style="flex:1;padding:8px 12px;border-radius:8px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.05);color:#fff;font-family:'Tajawal',sans-serif;font-size:13px;">
+                        <option value="">-- اختر رتبة --</option>
+                        <% guildRoles.filter(r => !currentExempt.includes(r.id)).forEach(r => { %>
+                            <option value="<%= r.id %>" style="background:#1a1a2e;"><%= r.name %></option>
+                        <% }); %>
+                    </select>
+                    <button onclick="addExemptRole()" style="padding:8px 20px;background:linear-gradient(135deg,#6366f1,#8b5cf6);border:none;border-radius:8px;color:#fff;font-family:'Tajawal',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all 0.3s;">➕ إضافة</button>
+                </div>
+            </div>
+
+            <div id="settingsPanel">
+                <div class="panel-header">
+                    <h2 id="panelTitle">⚙️ الإعدادات</h2>
+                    <button class="close-btn" onclick="closePanel()">✕</button>
+                </div>
+                <div id="panelContent"></div>
+            </div>
+
+            <div class="section" id="logsSection">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:15px;flex-wrap:wrap;gap:10px;">
+                    <h2>📋 سجل الأحداث</h2>
+                    <div style="display:flex;align-items:center;gap:8px;">
+                        <select id="logFilter" onchange="filterLogs()" style="padding:6px 12px;border-radius:8px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.05);color:#fff;font-family:'Tajawal',sans-serif;font-size:12px;outline:none;">
+                            <option value="all" style="background:#1a1a2e;">🔁 جميع الأنظمة</option>
+                            <option value="antiRaid" style="background:#1a1a2e;">⚔️ منع الهجمات</option>
+                            <option value="antiSpam" style="background:#1a1a2e;">📨 منع السبام</option>
+                            <option value="antiLink" style="background:#1a1a2e;">🔗 منع الروابط</option>
+                            <option value="antiBot" style="background:#1a1a2e;">🤖 منع البوتات</option>
+                            <option value="antiSelfbot" style="background:#1a1a2e;">👤 منع السيلف بوت</option>
+                            <option value="antiWebhook" style="background:#1a1a2e;">🪝 منع الويهوك</option>
+                            <option value="antiNickname" style="background:#1a1a2e;">✏️ حماية الاختصار</option>
+                            <option value="antiChannelDelete" style="background:#1a1a2e;">🗑️ حماية الرومات</option>
+                            <option value="antiChannelCreate" style="background:#1a1a2e;">➕ منع الرومات</option>
+                            <option value="antiRoleDelete" style="background:#1a1a2e;">🎭 حماية الرتب</option>
+                            <option value="antiRoleCreate" style="background:#1a1a2e;">✨ منع الرتب</option>
+                            <option value="antiBan" style="background:#1a1a2e;">🔨 منع الحظر</option>
+                            <option value="antiKick" style="background:#1a1a2e;">👢 منع الطرد</option>
+                            <option value="antiPrune" style="background:#1a1a2e;">✂️ منع التنظيف</option>
+                            <option value="antiEmojiDelete" style="background:#1a1a2e;">😭 حماية الإيموجي</option>
+                            <option value="antiEmojiCreate" style="background:#1a1a2e;">😊 منع الإيموجي</option>
+                            <option value="antiStickerDelete" style="background:#1a1a2e;">🏷️ حماية الملصقات</option>
+                            <option value="antiStickerCreate" style="background:#1a1a2e;">📝 منع الملصقات</option>
+                            <option value="antiIntegration" style="background:#1a1a2e;">🔌 حماية التكاملات</option>
+                            <option value="antiVanity" style="background:#1a1a2e;">💫 حماية الرابط</option>
+                            <option value="antiAlts" style="background:#1a1a2e;">👶 منع الوهمية</option>
+                            <option value="antiToxic" style="background:#1a1a2e;">☣️ منع المسيئة</option>
+                            <option value="antiCapslock" style="background:#1a1a2e;">🔠 منع الكابس</option>
+                            <option value="antiMassMention" style="background:#1a1a2e;">📢 منع المنشن</option>
+                            <option value="antiFlood" style="background:#1a1a2e;">🌊 منع التكرار</option>
+                            <option value="antiInvite" style="background:#1a1a2e;">📩 منع الدعوات</option>
+                            <option value="antiGhostPing" style="background:#1a1a2e;">👻 منع الشبح</option>
+                            <option value="antiMassBan" style="background:#1a1a2e;">💥 منع الحظر الجماعي</option>
+                            <option value="antiMassKick" style="background:#1a1a2e;">🦵 منع الطرد الجماعي</option>
+                            <option value="antiPermissionGuard" style="background:#1a1a2e;">🔐 حراسة الصلاحيات</option>
+                            <option value="punishment" style="background:#1a1a2e;">🔨 عقوبات</option>
+                            <option value="dashboard" style="background:#1a1a2e;">🌐 لوحة التحكم</option>
+                        </select>
+                        <span class="pill bg-blue" id="liveBadge" style="font-size:11px;">🔴 غير متصل</span>
+                    </div>
+                </div>
+                <div class="logs-container" id="logsContainer">
+                    <% if (logs.length === 0) { %>
+                        <div class="no-logs" id="noLogsMsg">📭 لا توجد أحداث بعد</div>
+                    <% } else { %>
+                        <% logs.forEach(log => { %>
+                            <div class="log-entry<%= log.type === 'punishment' ? ' log-punish' : '' %><%= (typeof log.action === 'object' && log.action.severity === 'danger') ? ' log-danger' : '' %>" data-type="<%= log.type %>">
+                                <div style="display:flex;align-items:center;gap:8px;flex:1;min-width:0;">
+                                    <% if (typeof log.action === 'object') { %>
+                                        <span style="font-size:16px;"><%= log.action.icon || '📌' %></span>
+                                        <div style="flex:1;min-width:0;">
+                                            <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+                                                <span style="font-weight:600;font-size:13px;"><%= log.action.userTag || 'System' %></span>
+                                                <% if (log.action.severity === 'danger') { %>
+                                                    <span class="pill bg-red">🚨 حظر</span>
+                                                <% } else if (log.action.severity === 'warning') { %>
+                                                    <span class="pill bg-yellow">⚠️ مخالفة</span>
+                                                <% } else { %>
+                                                    <span class="pill bg-blue">ℹ️ معلومات</span>
+                                                <% } %>
+                                            </div>
+                                            <div style="font-size:12px;color:rgba(255,255,255,0.7);margin-top:2px;"><%= log.action.description %></div>
+                                        </div>
+                                    <% } else { %>
+                                        <span style="font-size:16px;">📌</span>
+                                        <div style="flex:1;min-width:0;">
+                                            <div style="font-size:13px;font-weight:500;"><%= log.action %></div>
+                                            <% if (log.details && typeof log.details === 'object') { %>
+                                                <div style="font-size:12px;color:rgba(255,255,255,0.5);"><%= JSON.stringify(log.details) %></div>
+                                            <% } else if (log.details) { %>
+                                                <div style="font-size:12px;color:rgba(255,255,255,0.5);"><%= log.details %></div>
+                                            <% } %>
+                                        </div>
+                                    <% } %>
+                                </div>
+                                <span class="log-time" style="white-space:nowrap;margin-right:8px;"><%= new Date(log.timestamp).toLocaleString('ar-SA') %></span>
+                            </div>
+                        <% }) %>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const settings = <%- JSON.stringify(settings) %>;
+        const punishmentMap = <%- JSON.stringify(punishmentMap) %>;
+
+        const systemConfigs = {
+            antiRaid: { name: 'منع الهجمات الجماعية', icon: '⚔️', desc: 'يمنع دخول عدد كبير خلال وقت قصير', fields: [
+                { key: 'maxJoins', label: 'عدد الأعضاء المسموح', type: 'number', desc: 'أقصى عدد أعضاء قبل التفعيل' },
+                { key: 'timeWindow', label: 'الوقت (ميلي ثانية)', type: 'number', desc: 'المدة الزمنية لحساب الدخول' },
+                { key: 'punishment', label: 'نوع العقوبة', type: 'select' }
+            ]},
+            antiSpam: { name: 'منع السبام', icon: '📨', desc: 'يمنع إرسال رسائل كثيرة خلال وقت قصير', fields: [
+                { key: 'maxMessages', label: 'عدد الرسائل المسموح', type: 'number' },
+                { key: 'timeWindow', label: 'الوقت (ميلي ثانية)', type: 'number' },
+                { key: 'punishment', label: 'نوع العقوبة', type: 'select' },
+                { key: 'duration', label: 'مدة العقوبة (ميلي ثانية)', type: 'number' }
+            ]},
+            antiLink: { name: 'منع الروابط', icon: '🔗', desc: 'يمنع إرسال الروابط', fields: [
+                { key: 'punishment', label: 'نوع العقوبة', type: 'select' },
+                { key: 'duration', label: 'مدة العقوبة (ميلي ثانية)', type: 'number' }
+            ]},
+            antiBot: { name: 'منع البوتات', icon: '🤖', desc: 'يمنع دخول البوتات', fields: [
+                { key: 'punishment', label: 'نوع العقوبة', type: 'select' }
+            ]},
+            antiSelfbot: { name: 'منع السيلف بوت', icon: '👤', desc: 'يكشف السيلف بوت ويعاقبه', fields: [
+                { key: 'punishment', label: 'نوع العقوبة', type: 'select' }
+            ]},
+            antiWebhook: { name: 'منع الويهوك', icon: '🪝', desc: 'يمنع إنشاء الويهوكات', fields: [
+                { key: 'punishment', label: 'نوع العقوبة', type: 'select' }
+            ]},
+            antiNickname: { name: 'حماية الاختصار', icon: '✏️', desc: 'يمنع إزالة الاختصارات ويسحب رتب المخالف', fields: [
+                { key: 'punishment', label: 'نوع العقوبة', type: 'select' },
+                { key: 'duration', label: 'مدة العقوبة', type: 'number' }
+            ]},
+            antiChannelDelete: { name: 'حماية الرومات', icon: '🗑️', desc: 'يرجع الروم المحذوف ويعاقب', fields: [
+                { key: 'punishment', label: 'نوع العقوبة', type: 'select' }
+            ]},
+            antiChannelCreate: { name: 'منع الرومات الجديدة', icon: '➕', desc: 'يمسح الروم الجديد ويعاقب منشئه', fields: [
+                { key: 'punishment', label: 'نوع العقوبة', type: 'select' }
+            ]},
+            antiRoleDelete: { name: 'حماية الرتب', icon: '🎭', desc: 'يرجع الرتبة المحذوفة ويعاقب', fields: [
+                { key: 'punishment', label: 'نوع العقوبة', type: 'select' }
+            ]},
+            antiRoleCreate: { name: 'منع الرتب الجديدة', icon: '✨', desc: 'يمسح الرتبة الجديدة ويعاقب', fields: [
+                { key: 'punishment', label: 'نوع العقوبة', type: 'select' }
+            ]},
+            antiBan: { name: 'منع الحظر', icon: '🔨', desc: 'يرفع الحظر ويمنعه', fields: []},
+            antiKick: { name: 'منع الطرد', icon: '👢', desc: 'يمنع طرد الأعضاء', fields: [
+                { key: 'punishment', label: 'نوع العقوبة', type: 'select' }
+            ]},
+            antiPrune: { name: 'منع التنظيف', icon: '✂️', desc: 'يمنع التنظيف الجماعي', fields: [
+                { key: 'punishment', label: 'نوع العقوبة', type: 'select' }
+            ]},
+            antiEmojiDelete: { name: 'حماية الإيموجي', icon: '😭', desc: 'يمنع حذف الإيموجي', fields: [
+                { key: 'punishment', label: 'نوع العقوبة', type: 'select' },
+                { key: 'duration', label: 'مدة العقوبة', type: 'number' }
+            ]},
+            antiEmojiCreate: { name: 'منع الإيموجي', icon: '😊', desc: 'يمسح الإيموجي الجديد', fields: [
+                { key: 'punishment', label: 'نوع العقوبة', type: 'select' },
+                { key: 'duration', label: 'مدة العقوبة', type: 'number' }
+            ]},
+            antiStickerDelete: { name: 'حماية الملصقات', icon: '🏷️', desc: 'يمنع حذف الملصقات', fields: [
+                { key: 'punishment', label: 'نوع العقوبة', type: 'select' },
+                { key: 'duration', label: 'مدة العقوبة', type: 'number' }
+            ]},
+            antiStickerCreate: { name: 'منع الملصقات', icon: '📝', desc: 'يمسح الملصق الجديد', fields: [
+                { key: 'punishment', label: 'نوع العقوبة', type: 'select' },
+                { key: 'duration', label: 'مدة العقوبة', type: 'number' }
+            ]},
+            antiIntegration: { name: 'حماية التكاملات', icon: '🔌', desc: 'يمنع التعديل على التكاملات', fields: [
+                { key: 'punishment', label: 'نوع العقوبة', type: 'select' }
+            ]},
+            antiVanity: { name: 'حماية الرابط', icon: '💫', desc: 'يمنع تغيير رابط السيرفر', fields: [
+                { key: 'punishment', label: 'نوع العقوبة', type: 'select' }
+            ]},
+            antiAlts: { name: 'منع الحسابات الوهمية', icon: '👶', desc: 'يمنع الحسابات الجديدة', fields: [
+                { key: 'maxAge', label: 'أقل عمر (أيام)', type: 'number' },
+                { key: 'punishment', label: 'نوع العقوبة', type: 'select' }
+            ]},
+            antiToxic: { name: 'منع الكلمات المسيئة', icon: '☣️', desc: 'يمسح الكلمات الممنوعة', fields: [
+                { key: 'words', label: 'الكلمات (مفصولة بفاصلة)', type: 'text' },
+                { key: 'punishment', label: 'نوع العقوبة', type: 'select' },
+                { key: 'duration', label: 'مدة العقوبة', type: 'number' }
+            ]},
+            antiCapslock: { name: 'منع الأحرف الكبيرة', icon: '🔠', desc: 'يمسح الرسائل اللي فيها أحرف كبيرة كثيرة', fields: [
+                { key: 'minLength', label: 'أقل طول للرسالة', type: 'number' },
+                { key: 'capPercent', label: 'نسبة الأحرف الكبيرة (%)', type: 'number' },
+                { key: 'punishment', label: 'نوع العقوبة', type: 'select' },
+                { key: 'duration', label: 'مدة العقوبة', type: 'number' }
+            ]},
+            antiMassMention: { name: 'منع المنشن الجماعي', icon: '📢', desc: 'يمنع التاغ الجماعي', fields: [
+                { key: 'maxMentions', label: 'أقصى عدد منشن', type: 'number' },
+                { key: 'punishment', label: 'نوع العقوبة', type: 'select' },
+                { key: 'duration', label: 'مدة العقوبة', type: 'number' }
+            ]},
+            antiFlood: { name: 'منع التكرار', icon: '🌊', desc: 'يمنع تكرار نفس الرسالة', fields: [
+                { key: 'maxRepeats', label: 'عدد التكرار المسموح', type: 'number' },
+                { key: 'timeWindow', label: 'الوقت (ميلي ثانية)', type: 'number' },
+                { key: 'punishment', label: 'نوع العقوبة', type: 'select' },
+                { key: 'duration', label: 'مدة العقوبة', type: 'number' }
+            ]},
+            antiInvite: { name: 'منع الدعوات', icon: '📩', desc: 'يمنع روابط سيرفرات أخرى', fields: [
+                { key: 'punishment', label: 'نوع العقوبة', type: 'select' },
+                { key: 'duration', label: 'مدة العقوبة', type: 'number' }
+            ]},
+            antiGhostPing: { name: 'منع الشبح', icon: '👻', desc: 'يكشف منشن الحذف', fields: [
+                { key: 'punishment', label: 'نوع العقوبة', type: 'select' },
+                { key: 'duration', label: 'مدة العقوبة', type: 'number' }
+            ]},
+            antiMassBan: { name: 'منع الحظر الجماعي', icon: '💥', desc: 'يمنع حظر عدة أعضاء', fields: [
+                { key: 'maxBans', label: 'أقصى عدد حظر', type: 'number' },
+                { key: 'timeWindow', label: 'الوقت (ميلي ثانية)', type: 'number' },
+                { key: 'punishment', label: 'نوع العقوبة', type: 'select' }
+            ]},
+            antiMassKick: { name: 'منع الطرد الجماعي', icon: '🦵', desc: 'يمنع طرد عدة أعضاء', fields: [
+                { key: 'maxKicks', label: 'أقصى عدد طرد', type: 'number' },
+                { key: 'timeWindow', label: 'الوقت (ميلي ثانية)', type: 'number' },
+                { key: 'punishment', label: 'نوع العقوبة', type: 'select' }
+            ]},
+            antiPermissionGuard: { name: 'حراسة الصلاحيات', icon: '🔐', desc: 'يمنع تغيير الصلاحيات', fields: [
+                { key: 'punishment', label: 'نوع العقوبة', type: 'select' }
+            ]}
+        };
+
+        function showToast(msg, type) {
+            const t = document.getElementById('toast');
+            t.textContent = msg;
+            t.className = 'toast' + (type ? ' ' + type : '');
+            t.style.display = 'block';
+            setTimeout(() => t.style.display = 'none', 3500);
+        }
+
+        function updateActiveCount() {
+            const checkboxes = document.querySelectorAll('#systemsList input[type="checkbox"]');
+            const active = Array.from(checkboxes).filter(c => c.checked).length;
+            document.getElementById('activeCount').textContent = active + '/30';
+            const totalOn = document.getElementById('totalOn');
+            if (totalOn) totalOn.textContent = active;
+            checkboxes.forEach(cb => {
+                const sys = cb.closest('.system-item').dataset.system;
+                const badge = document.getElementById('badge_' + sys);
+                if (badge) {
+                    badge.textContent = cb.checked ? 'ON' : 'OFF';
+                    badge.className = 'badge ' + (cb.checked ? 'enabled' : 'disabled');
+                }
+            });
+        }
+
+        function filterSystems(val) {
+            const items = document.querySelectorAll('.system-item');
+            const q = val.toLowerCase();
+            items.forEach(item => {
+                const name = item.querySelector('.name').textContent.toLowerCase();
+                item.style.display = name.includes(q) ? 'flex' : 'none';
+            });
+        }
+
+        function selectSystem(key) {
+            document.querySelectorAll('.system-item').forEach(el => el.classList.remove('active'));
+            const el = document.querySelector(`.system-item[data-system="${key}"]`);
+            if (el) el.classList.add('active');
+            showSettings(key);
+        }
+
+        function closePanel() {
+            document.getElementById('settingsPanel').classList.remove('visible');
+            document.querySelectorAll('.system-item').forEach(el => el.classList.remove('active'));
+        }
+
+        function showSettings(key) {
+            const cfg = systemConfigs[key];
+            if (!cfg) return;
+            const sysSettings = settings[key] || {};
+            const panel = document.getElementById('settingsPanel');
+            const title = document.getElementById('panelTitle');
+            const content = document.getElementById('panelContent');
+
+            title.textContent = cfg.icon + ' ' + cfg.name;
+            let html = `<p style="color:rgba(255,255,255,0.5);font-size:13px;margin-bottom:16px;">${cfg.desc}</p>`;
+
+            if (cfg.fields.length === 0) {
+                html += `<p style="color:rgba(255,255,255,0.4);text-align:center;padding:20px;">✅ هذا النظام لا يحتاج إعدادات</p>`;
+            } else {
+                cfg.fields.forEach(f => {
+                    const val = sysSettings[f.key] !== undefined ? sysSettings[f.key] : '';
+                    html += `<div class="setting-group"><label>${f.label}</label>`;
+                    if (f.desc) html += `<div class="desc">${f.desc}</div>`;
+                    if (f.type === 'select') {
+                        html += `<select id="field_${f.key}">`;
+                        for (const [vk, vn] of Object.entries(punishmentMap)) {
+                            html += `<option value="${vk}" ${(sysSettings[f.key] || 'timeout') === vk ? 'selected' : ''}>${vn}</option>`;
+                        }
+                        html += `</select>`;
+                    } else {
+                        html += `<input type="${f.type}" id="field_${f.key}" value="${val}" placeholder="${f.label}">`;
+                    }
+                    html += `</div>`;
+                });
+                html += `<button class="btn-save" onclick="saveSettings('${key}')">💾 حفظ الإعدادات</button>`;
+            }
+            content.innerHTML = html;
+            panel.classList.add('visible');
+        }
+
+        async function saveSettings(key) {
+            const cfg = systemConfigs[key];
+            const data = {};
+            cfg.fields.forEach(f => {
+                const el = document.getElementById('field_' + f.key);
+                if (el) {
+                    if (f.type === 'number') data[f.key] = parseFloat(el.value) || 0;
+                    else data[f.key] = el.value;
+                }
+            });
+            try {
+                const res = await fetch('/api/server/<%= guild.id %>/setting', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ system: key, settings: data })
+                });
+                const d = await res.json();
+                if (d.success) showToast(`✅ حفظ إعدادات ${cfg.name}`);
+                else showToast('❌ فشل الحفظ', 'error');
+            } catch (e) { showToast('❌ حدث خطأ', 'error'); }
+        }
+
+        // ===== MODAL SYSTEM =====
+        let modalCallback = null;
+
+        function showModal(icon, title, desc, details, confirmText, callback) {
+            document.getElementById('modalIcon').textContent = icon;
+            document.getElementById('modalIcon').className = 'modal-icon warning';
+            document.getElementById('modalTitle').textContent = title;
+            document.getElementById('modalDesc').textContent = desc;
+            const detailsEl = document.getElementById('modalDetails');
+            if (details) {
+                detailsEl.innerHTML = details;
+                detailsEl.style.display = 'block';
+            } else {
+                detailsEl.style.display = 'none';
+            }
+            document.getElementById('modalConfirm').textContent = confirmText || 'تأكيد';
+            modalCallback = callback;
+            document.getElementById('modalOverlay').classList.add('show');
+        }
+
+        function closeModal() {
+            document.getElementById('modalOverlay').classList.remove('show');
+            modalCallback = null;
+        }
+
+        document.getElementById('modalConfirm').addEventListener('click', () => {
+            if (modalCallback) modalCallback();
+            closeModal();
+        });
+
+        // ===== TOGGLE =====
+        async function toggleSystem(system, enabled) {
+            try {
+                const res = await fetch('/api/server/<%= guild.id %>/toggle', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ system, enabled })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    const cfg = systemConfigs[system];
+                    showToast(`✅ ${enabled ? 'تفعيل' : 'إيقاف'} ${cfg ? cfg.name : system}`);
+                    updateActiveCount();
+                }
+            } catch (e) { showToast('❌ حدث خطأ', 'error'); }
+        }
+
+        async function toggleAll(enabled) {
+            const action = enabled ? 'تفعيل' : 'إيقاف';
+            showModal(
+                enabled ? '🔒' : '🔓',
+                `${action} جميع الأنظمة؟`,
+                `هل تريد ${action} جميع أنظمة الحماية الـ 30؟`,
+                null,
+                `نعم، ${action} الكل`,
+                async () => {
+                    try {
+                        const res = await fetch('/api/server/<%= guild.id %>/toggle', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ system: 'all', enabled })
+                        });
+                        const data = await res.json();
+                        if (data.success) {
+                            document.querySelectorAll('#systemsList input[type="checkbox"]').forEach(cb => { cb.checked = enabled; });
+                            showToast(`✅ ${action} جميع الأنظمة`);
+                            updateActiveCount();
+                        }
+                    } catch (e) { showToast('❌ حدث خطأ', 'error'); }
+                }
+            );
+        }
+
+        // ===== EXEMPT ROLES =====
+        async function addExemptRole() {
+            const select = document.getElementById('exemptRoleSelect');
+            const roleId = select.value;
+            if (!roleId) return showToast('❌ اختر رتبة أولاً', 'error');
+            const container = document.getElementById('exemptRolesContainer');
+            // Get current exempt role IDs from tags
+            const currentIds = Array.from(container.querySelectorAll('.exempt-role-tag')).map(el => el.dataset.id);
+            if (currentIds.includes(roleId)) return showToast('⚠️ الرتبة موجودة مسبقاً', 'error');
+
+            // Find the role name from the select options
+            const option = select.querySelector(`option[value="${roleId}"]`);
+            const roleName = option ? option.textContent : roleId;
+
+            // Optimistic update
+            const role = <%- JSON.stringify(guildRoles.reduce((acc, r) => { acc[r.id] = r; return acc; }, {})) %>;
+            const r = role[roleId];
+            const tag = document.createElement('span');
+            tag.className = 'exempt-role-tag';
+            tag.dataset.id = roleId;
+            tag.innerHTML = `<span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${r?.color || '#6366f1'};margin-left:5px;"></span> ${r?.name || roleName} <span class="remove-role" onclick="removeExemptRole('${roleId}')" style="cursor:pointer;margin-right:6px;opacity:0.6;">✕</span>`;
+            container.appendChild(tag);
+            select.remove(select.selectedIndex);
+            select.value = '';
+
+            // Save to server
+            const newIds = currentIds.concat(roleId);
+            try {
+                const res = await fetch('/api/server/<%= guild.id %>/exempt-roles', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ roles: newIds })
+                });
+                const data = await res.json();
+                if (!data.success) throw new Error('API error');
+                showToast(`✅ تمت إضافة ${r?.name || roleName} للرتب المستثناة`);
+            } catch (e) {
+                tag.remove();
+                // Re-add option
+                const opt = document.createElement('option');
+                opt.value = roleId;
+                opt.textContent = roleName;
+                opt.style.background = '#1a1a2e';
+                select.appendChild(opt);
+                showToast('❌ فشل حفظ الرتب المستثناة', 'error');
+            }
+        }
+
+        async function removeExemptRole(roleId) {
+            const container = document.getElementById('exemptRolesContainer');
+            const currentIds = Array.from(container.querySelectorAll('.exempt-role-tag')).map(el => el.dataset.id);
+
+            const tag = container.querySelector(`.exempt-role-tag[data-id="${roleId}"]`);
+            if (!tag) return;
+            const roleName = tag.textContent.replace('✕', '').trim();
+
+            // Optimistic
+            tag.style.opacity = '0.3';
+            const newIds = currentIds.filter(id => id !== roleId);
+
+            try {
+                const res = await fetch('/api/server/<%= guild.id %>/exempt-roles', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ roles: newIds })
+                });
+                const data = await res.json();
+                if (!data.success) throw new Error('API error');
+                tag.remove();
+                // Re-add to select
+                const select = document.getElementById('exemptRoleSelect');
+                const opt = document.createElement('option');
+                opt.value = roleId;
+                opt.textContent = roleName;
+                opt.style.background = '#1a1a2e';
+                select.appendChild(opt);
+                showToast(`✅ تمت إزالة ${roleName} من الرتب المستثناة`);
+            } catch (e) {
+                tag.style.opacity = '1';
+                showToast('❌ فشل إزالة الرتبة', 'error');
+            }
+        }
+
+        // ===== BEAST MODE =====
+        function showBeastModal() {
+            const details = `
+                <div style="background:rgba(239,68,68,0.08);border-radius:10px;padding:12px;margin-bottom:8px;">
+                    <div style="font-size:13px;font-weight:700;color:#f87171;margin-bottom:6px;">🚨 حظر فوري (Ban)</div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;font-size:12px;color:#fca5a5;">
+                        <span>🗑️ حذف روم</span>
+                        <span>➕ إنشاء روم</span>
+                        <span>🎭 حذف رتبة</span>
+                        <span>✨ إنشاء رتبة</span>
+                        <span>🪝 ويهوك</span>
+                        <span>🤖 بوتات</span>
+                        <span>⚔️ رايد</span>
+                        <span>👤 سيلف بوت</span>
+                        <span>✏️ اختصار</span>
+                        <span>🔌 تكاملات</span>
+                        <span>🔐 صلاحيات</span>
+                        <span>💫 فانيتي</span>
+                        <span>💥 حظر جماعي</span>
+                        <span>🦵 طرد جماعي</span>
+                        <span>🔨 منع حظر</span>
+                        <span>👢 منع طرد</span>
+                        <span>✂️ منع تنظيف</span>
+                    </div>
+                </div>
+                <div style="background:rgba(234,179,8,0.08);border-radius:10px;padding:12px;margin-bottom:8px;">
+                    <div style="font-size:13px;font-weight:700;color:#facc15;margin-bottom:6px;">⚠️ كتم (Timeout)</div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;font-size:12px;color:#fde68a;">
+                        <span>📨 سبام</span>
+                        <span>🔗 روابط</span>
+                        <span>☣️ كلمات مسيئة</span>
+                        <span>🔠 كابس لوك</span>
+                        <span>📢 منشن جماعي</span>
+                        <span>🌊 تكرار رسائل</span>
+                        <span>📩 دعوات</span>
+                        <span>👻 شبح منشن</span>
+                        <span>😭 حذف إيموجي</span>
+                        <span>😊 إضافة إيموجي</span>
+                        <span>🏷️ حذف ملصق</span>
+                        <span>📝 إضافة ملصق</span>
+                    </div>
+                </div>
+                <div style="background:rgba(34,197,94,0.08);border-radius:10px;padding:12px;">
+                    <div style="font-size:13px;font-weight:700;color:#4ade80;margin-bottom:6px;">👢 طرد (Kick)</div>
+                    <div style="font-size:12px;color:#86efac;">
+                        👶 حسابات وهمية (أقل من 14 يوم)
+                    </div>
+                </div>
+            `;
+            showModal(
+                '👹',
+                'تفعيل نظام الوحش؟',
+                'جميع أنظمة الحماية راح تتفعل بأقصى عقوبة! السيرفر يدخل في وضع الحماية القصوى.',
+                details,
+                '👹 نعم، فك الوحش',
+                async () => {
+                    const beastSettings = {
+                        antiRaid: { enabled: true, punishment: 'ban', maxJoins: 3, timeWindow: 15000 },
+                        antiSpam: { enabled: true, punishment: 'timeout', maxMessages: 4, timeWindow: 4000, duration: 600000 },
+                        antiLink: { enabled: true, punishment: 'timeout', duration: 300000 },
+                        antiBot: { enabled: true, punishment: 'ban' },
+                        antiSelfbot: { enabled: true, punishment: 'ban' },
+                        antiWebhook: { enabled: true, punishment: 'ban' },
+                        antiNickname: { enabled: true, punishment: 'ban' },
+                        antiChannelDelete: { enabled: true, punishment: 'ban' },
+                        antiChannelCreate: { enabled: true, punishment: 'ban' },
+                        antiRoleDelete: { enabled: true, punishment: 'ban' },
+                        antiRoleCreate: { enabled: true, punishment: 'ban' },
+                        antiBan: { enabled: true },
+                        antiKick: { enabled: true, punishment: 'ban' },
+                        antiPrune: { enabled: true, punishment: 'ban' },
+                        antiEmojiDelete: { enabled: true, punishment: 'timeout', duration: 600000 },
+                        antiEmojiCreate: { enabled: true, punishment: 'timeout', duration: 600000 },
+                        antiStickerDelete: { enabled: true, punishment: 'timeout', duration: 600000 },
+                        antiStickerCreate: { enabled: true, punishment: 'timeout', duration: 600000 },
+                        antiIntegration: { enabled: true, punishment: 'ban' },
+                        antiVanity: { enabled: true, punishment: 'ban' },
+                        antiAlts: { enabled: true, punishment: 'kick', maxAge: 14 },
+                        antiToxic: { enabled: true, punishment: 'timeout', duration: 300000 },
+                        antiCapslock: { enabled: true, punishment: 'timeout', minLength: 8, capPercent: 60, duration: 120000 },
+                        antiMassMention: { enabled: true, punishment: 'timeout', maxMentions: 3, duration: 600000 },
+                        antiFlood: { enabled: true, punishment: 'timeout', maxRepeats: 2, timeWindow: 6000, duration: 600000 },
+                        antiInvite: { enabled: true, punishment: 'timeout', duration: 600000 },
+                        antiGhostPing: { enabled: true, punishment: 'timeout', duration: 600000 },
+                        antiMassBan: { enabled: true, punishment: 'ban', maxBans: 2, timeWindow: 5000 },
+                        antiMassKick: { enabled: true, punishment: 'ban', maxKicks: 2, timeWindow: 5000 },
+                        antiPermissionGuard: { enabled: true, punishment: 'ban' }
+                    };
+                    try {
+                        const res = await fetch('/api/server/<%= guild.id %>/beast', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ settings: beastSettings })
+                        });
+                        const data = await res.json();
+                        if (data.success) {
+                            for (const [sys] of Object.entries(beastSettings)) {
+                                const cb = document.getElementById('cb_' + sys);
+                                if (cb) cb.checked = true;
+                            }
+                            updateActiveCount();
+                            document.getElementById('beastInfo').style.display = 'block';
+                            showToast('👹 نظام الوحش مفعل! أي تخريب = حظر', 'beast');
+                        }
+                    } catch (e) { showToast('❌ حدث خطأ', 'error'); }
+                }
+            );
+        }
+
+        async function stopBeastMode() {
+            showModal(
+                '⛔',
+                'إيقاف نظام الوحش؟',
+                'راح ترجع جميع الأنظمة إلى الإعدادات الافتراضية (غير مفعلة).',
+                null,
+                '⛔ نعم، إيقاف',
+                async () => {
+                    const allSettings = <%- JSON.stringify(Object.fromEntries(Object.entries(defaultSettings).map(([k,v]) => [k, {enabled: false, ...Object.fromEntries(Object.entries(v).filter(([kk]) => kk !== 'enabled'))}]))) %>;
+                    const { exemptRoles, ...systemSettings } = allSettings;
+                    try {
+                        const res = await fetch('/api/server/<%= guild.id %>/beast', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ settings: systemSettings })
+                        });
+                        const data = await res.json();
+                        if (data.success) {
+                            for (const [sys] of Object.entries(systemSettings)) {
+                                const cb = document.getElementById('cb_' + sys);
+                                if (cb) cb.checked = false;
+                            }
+                            updateActiveCount();
+                            document.getElementById('beastInfo').style.display = 'none';
+                            showToast('⛔ تم إيقاف نظام الوحش');
+                        }
+                    } catch (e) { showToast('❌ حدث خطأ', 'error'); }
+                }
+            );
+        }
+
+        async function createBackup() {
+            try {
+                const res = await fetch('/api/server/<%= guild.id %>/backup');
+                const data = await res.json();
+                if (data.success) showToast('✅ تم إنشاء النسخة الاحتياطية');
+            } catch (e) { showToast('❌ حدث خطأ', 'error'); }
+        }
+
+        // ===== LOGS AUTO-REFRESH & FILTER =====
+        let logRefreshInterval = null;
+        let lastLogCount = <%= logs.length %>;
+
+        function updateLiveBadge(connected) {
+            const badge = document.getElementById('liveBadge');
+            if (badge) {
+                badge.textContent = connected ? '🟢 مباشر' : '🔴 غير متصل';
+                badge.className = 'pill' + (connected ? ' live-active' : '');
+            }
+        }
+
+        function getLogIcon(type) {
+            const icons = {
+                antiRaid: '⚔️', antiSpam: '📨', antiLink: '🔗', antiBot: '🤖',
+                antiSelfbot: '👤', antiWebhook: '🪝', antiNickname: '✏️',
+                antiChannelDelete: '🗑️', antiChannelCreate: '➕', antiRoleDelete: '🎭',
+                antiRoleCreate: '✨', antiBan: '🔨', antiKick: '👢', antiPrune: '✂️',
+                antiEmojiDelete: '😭', antiEmojiCreate: '😊', antiStickerDelete: '🏷️',
+                antiStickerCreate: '📝', antiIntegration: '🔌', antiVanity: '💫',
+                antiAlts: '👶', antiToxic: '☣️', antiCapslock: '🔠', antiMassMention: '📢',
+                antiFlood: '🌊', antiInvite: '📩', antiGhostPing: '👻', antiMassBan: '💥',
+                antiMassKick: '🦵', antiPermissionGuard: '🔐', punishment: '🔨', dashboard: '🌐',
+                system: '🛡️', command: '📝'
+            };
+            return icons[type] || '📌';
+        }
+
+        function filterLogs() {
+            const filter = document.getElementById('logFilter').value;
+            const entries = document.querySelectorAll('#logsContainer .log-entry');
+            entries.forEach(el => {
+                const type = el.dataset.type;
+                el.style.display = (filter === 'all' || type === filter) ? 'flex' : 'none';
+            });
+            const visible = Array.from(entries).filter(e => e.style.display !== 'none').length;
+            const noMsg = document.getElementById('noLogsMsg');
+            if (noMsg) noMsg.style.display = visible > 0 ? 'none' : 'block';
+        }
+
+        function renderLogEntry(log) {
+            const isStructured = typeof log.action === 'object' && log.action !== null;
+            const icon = isStructured ? (log.action.icon || getLogIcon(log.type)) : getLogIcon(log.type);
+            const userTag = isStructured ? (log.action.userTag || 'System') : 'System';
+            const description = isStructured ? (log.action.description || '') : (log.details || log.action || '');
+            const severity = isStructured ? (log.action.severity || 'info') : 'info';
+
+            let severityBadge = '';
+            if (severity === 'danger') severityBadge = '<span class="pill bg-red">🚨 حظر</span>';
+            else if (severity === 'warning') severityBadge = '<span class="pill bg-yellow">⚠️ مخالفة</span>';
+            else severityBadge = '<span class="pill bg-blue">ℹ️ معلومات</span>';
+
+            const time = new Date(log.timestamp).toLocaleString('ar-SA');
+
+            return `<div class="log-entry log-new${severity === 'danger' ? ' log-danger' : ''}${log.type === 'punishment' ? ' log-punish' : ''}" data-type="${log.type}">
+                <div style="display:flex;align-items:center;gap:8px;flex:1;min-width:0;">
+                    <span style="font-size:16px;">${icon}</span>
+                    <div style="flex:1;min-width:0;">
+                        <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+                            <span style="font-weight:600;font-size:13px;">${userTag}</span>
+                            ${severityBadge}
+                        </div>
+                        <div style="font-size:12px;color:rgba(255,255,255,0.7);margin-top:2px;">${description}</div>
+                    </div>
+                </div>
+                <span class="log-time" style="white-space:nowrap;margin-right:8px;">${time}</span>
+            </div>`;
+        }
+
+        async function refreshLogs() {
+            try {
+                const res = await fetch('/api/server/<%= guild.id %>/logs');
+                const data = await res.json();
+                if (data.logs) {
+                    const container = document.getElementById('logsContainer');
+                    const filter = document.getElementById('logFilter').value;
+
+                    if (data.logs.length > lastLogCount) {
+                        const newLogs = data.logs.slice(0, data.logs.length - lastLogCount);
+                        let newHtml = '';
+                        newLogs.forEach(log => {
+                            newHtml += renderLogEntry(log);
+                        });
+                        newHtml += container.innerHTML;
+                        container.innerHTML = newHtml;
+
+                        // Re-apply filter
+                        const entries = container.querySelectorAll('.log-entry');
+                        entries.forEach(el => {
+                            const type = el.dataset.type;
+                            if (filter !== 'all' && type !== filter) {
+                                el.style.display = 'none';
+                            }
+                        });
+
+                        lastLogCount = data.logs.length;
+                        const totalLogs = document.getElementById('totalLogs');
+                        if (totalLogs) totalLogs.textContent = data.logs.length;
+
+                        // Remove animation class after animation
+                        setTimeout(() => {
+                            container.querySelectorAll('.log-new').forEach(el => el.classList.remove('log-new'));
+                        }, 600);
+                    }
+
+                    updateLiveBadge(true);
+                }
+            } catch (e) {
+                updateLiveBadge(false);
+            }
+        }
+
+        function toggleLogs() {
+            if (logRefreshInterval) {
+                clearInterval(logRefreshInterval);
+                logRefreshInterval = null;
+                updateLiveBadge(false);
+            } else {
+                refreshLogs();
+                logRefreshInterval = setInterval(refreshLogs, 4000);
+                updateLiveBadge(true);
+            }
+        }
+
+        // Start auto-refresh on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            logRefreshInterval = setInterval(refreshLogs, 4000);
+            updateLiveBadge(true);
+        });
+
+        // Live badge click to toggle
+        document.getElementById('liveBadge')?.addEventListener('click', toggleLogs);
+
+        function showDiscordToast(e) {
+            e.preventDefault();
+            const t = document.getElementById('discordToast');
+            t.style.display = 'block';
+            window.open(e.currentTarget.href, '_blank');
+            setTimeout(() => t.style.display = 'none', 1200);
+        }
+
+        updateActiveCount();
+    </script>
+</body>
+</html>
