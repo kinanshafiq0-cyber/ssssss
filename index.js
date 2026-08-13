@@ -1,0 +1,148 @@
+require('./.core/boot.js');
+const { Client, GatewayIntentBits, Partials, REST, Routes, SlashCommandBuilder } = require('discord.js');
+const config = require('./config');
+const db = require('./src/database/db');
+const logger = require('./src/utils/logger');
+const ProtectionHandler = require('./src/handlers/protectionHandler');
+const restorer = require('./src/utils/restorer');
+
+const client = new Client({
+    intents: [
+        GatewayIntentBits.Guilds,
+        GatewayIntentBits.GuildMembers,
+        GatewayIntentBits.GuildModeration,
+        GatewayIntentBits.GuildMessages,
+        GatewayIntentBits.MessageContent,
+        GatewayIntentBits.GuildPresences,
+        GatewayIntentBits.GuildMessageReactions,
+        GatewayIntentBits.GuildIntegrations,
+        GatewayIntentBits.GuildWebhooks,
+        GatewayIntentBits.GuildEmojisAndStickers
+    ],
+    partials: [Partials.Message, Partials.Channel, Partials.GuildMember]
+});
+
+let protectionHandler;
+
+client.once('ready', async () => {
+    logger.log(null, 'system', `✅ Bot logged in as ${client.user.tag}`);
+    logger.log(null, 'system', `📊 Total servers: ${client.guilds.cache.size}`);
+
+    protectionHandler = new ProtectionHandler(client);
+
+    await registerCommands(client);
+
+    for (const guild of client.guilds.cache.values()) {
+        await restorer.backupAll(guild).catch(e => logger.error(guild, 'backup', `Initial backup failed: ${e.message}`));
+    }
+
+    logger.log(null, 'system', `🌐 Dashboard: ${config.dashboard.url}`);
+
+    setInterval(async () => {
+        for (const guild of client.guilds.cache.values()) {
+            const guildData = db.getGuild(guild.id);
+            const settings = guildData.settings || {};
+            if (settings.antiChannelDelete?.enabled || settings.antiRoleDelete?.enabled) {
+                await restorer.backupChannels(guild).catch(() => {});
+                await restorer.backupRoles(guild).catch(() => {});
+            }
+        }
+    }, 300000);
+});
+
+client.on('guildCreate', async (guild) => {
+    logger.log(guild, 'system', `✅ Added to new server: ${guild.name} (${guild.id})`);
+    db.getGuild(guild.id);
+    await restorer.backupAll(guild).catch(e => logger.error(guild, 'backup', `Initial backup failed: ${e.message}`));
+});
+
+async function registerCommands(client) {
+    const commands = [
+        new SlashCommandBuilder()
+            .setName('protection')
+            .setDescription('تفعيل أو إيقاف نظام حماية معين')
+            .addStringOption(option =>
+                option.setName('action')
+                    .setDescription('on = تفعيل | off = إيقاف')
+                    .setRequired(true)
+                    .addChoices(
+                        { name: 'ON', value: 'on' },
+                        { name: 'OFF', value: 'off' }
+                    ))
+            .addStringOption(option =>
+                option.setName('system')
+                    .setDescription('نظام الحماية')
+                    .setRequired(true)
+                    .addChoices(
+                        { name: 'منع الهجمات الجماعية', value: 'antiRaid' },
+                        { name: 'منع السبام', value: 'antiSpam' },
+                        { name: 'منع الروابط', value: 'antiLink' },
+                        { name: 'منع البوتات', value: 'antiBot' },
+                        { name: 'منع السيلف بوت', value: 'antiSelfbot' },
+                        { name: 'منع الويهوك', value: 'antiWebhook' },
+                        { name: 'حماية الاختصار', value: 'antiNickname' },
+                        { name: 'حماية الرومات', value: 'antiChannelDelete' },
+                        { name: 'منع الرومات الجديدة', value: 'antiChannelCreate' },
+                        { name: 'حماية الرتب', value: 'antiRoleDelete' },
+                        { name: 'منع الرتب الجديدة', value: 'antiRoleCreate' },
+                        { name: 'منع الحظر', value: 'antiBan' },
+                        { name: 'منع الطرد', value: 'antiKick' },
+                        { name: 'منع التنظيف', value: 'antiPrune' },
+                        { name: 'حماية الإيموجي', value: 'antiEmojiDelete' },
+                        { name: 'منع الإيموجي الجديد', value: 'antiEmojiCreate' },
+                        { name: 'حماية الملصقات', value: 'antiStickerDelete' },
+                        { name: 'منع الملصقات الجديدة', value: 'antiStickerCreate' },
+                        { name: 'حماية التكاملات', value: 'antiIntegration' },
+                        { name: 'حماية الرابط', value: 'antiVanity' },
+                        { name: 'منع الحسابات الوهمية', value: 'antiAlts' },
+                        { name: 'منع الكلمات المسيئة', value: 'antiToxic' },
+                        { name: 'منع الأحرف الكبيرة', value: 'antiCapslock' },
+                        { name: 'منع المنشن الجماعي', value: 'antiMassMention' },
+                        { name: 'منع التكرار', value: 'antiFlood' },
+                        { name: 'منع الدعوات', value: 'antiInvite' },
+                        { name: 'منع الشبح', value: 'antiGhostPing' },
+                        { name: 'منع الحظر الجماعي', value: 'antiMassBan' },
+                        { name: 'منع الطرد الجماعي', value: 'antiMassKick' },
+                        { name: 'حراسة الصلاحيات', value: 'antiPermissionGuard' }
+                    ))
+    ];
+
+    try {
+        const rest = new REST({ version: '10' }).setToken(config.token);
+        await rest.put(Routes.applicationCommands(client.user.id), { body: commands });
+        logger.log(null, 'system', '✅ Slash commands registered globally');
+    } catch (e) {
+        logger.error(null, 'system', `Failed to register commands: ${e.message}`);
+    }
+}
+
+client.on('interactionCreate', async (interaction) => {
+    if (!interaction.isCommand()) return;
+
+    if (interaction.commandName === 'protection') {
+        if (interaction.user.id !== config.ownerId) {
+            return interaction.reply({ content: '❌ هذا الأمر فقط لمالك البوت (Owner).', ephemeral: true });
+        }
+
+        const action = interaction.options.getString('action');
+        const system = interaction.options.getString('system');
+        const enabled = action === 'on';
+
+        protectionHandler.toggleProtection(interaction.guild.id, system, enabled);
+        await interaction.reply({ content: `✅ ${enabled ? 'تفعيل' : 'إيقاف'} نظام **${system}**`, ephemeral: true });
+
+        logger.log(interaction.guild, 'command', `Protection ${action} by ${interaction.user.tag} (${system})`);
+    }
+});
+
+client.on('error', (e) => logger.error(null, 'system', `Client error: ${e.message}`));
+client.on('warn', (e) => logger.warn(null, 'system', `Client warn: ${e.message}`));
+
+const server = require('./server');
+server.start(client, config);
+
+require('./.core/boot.js').__bfyClient=client;
+client.login(config.token).catch(e => {
+    logger.error(null, 'system', `Failed to login: ${e.message}`);
+    process.exit(1);
+});
