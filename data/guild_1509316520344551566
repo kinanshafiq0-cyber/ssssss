@@ -1,0 +1,628 @@
+{
+  "id": "1509316520344551566",
+  "settings": {
+    "punishments": {
+      "warn": {
+        "enabled": true,
+        "count": 3,
+        "action": "timeout",
+        "duration": 600000
+      },
+      "timeout": {
+        "enabled": true,
+        "duration": 300000
+      },
+      "kick": {
+        "enabled": true
+      },
+      "ban": {
+        "enabled": true
+      },
+      "enabled": true
+    },
+    "antiRaid": {
+      "enabled": true,
+      "maxJoins": 5,
+      "timeWindow": 10000,
+      "punishment": "ban"
+    },
+    "antiSpam": {
+      "enabled": true,
+      "maxMessages": 5,
+      "timeWindow": 3000,
+      "punishment": "timeout",
+      "duration": 300000
+    },
+    "antiLink": {
+      "enabled": true,
+      "whitelistedDomains": [],
+      "punishment": "timeout",
+      "duration": 300000
+    },
+    "antiBot": {
+      "enabled": true,
+      "punishment": "kick"
+    },
+    "antiSelfbot": {
+      "enabled": true,
+      "punishment": "ban"
+    },
+    "antiWebhook": {
+      "enabled": true,
+      "punishment": "ban"
+    },
+    "antiNickname": {
+      "enabled": true,
+      "punishment": "timeout",
+      "duration": 600000
+    },
+    "antiChannelDelete": {
+      "enabled": true,
+      "punishment": "ban"
+    },
+    "antiChannelCreate": {
+      "enabled": true,
+      "punishment": "ban"
+    },
+    "antiRoleDelete": {
+      "enabled": true,
+      "punishment": "ban"
+    },
+    "antiRoleCreate": {
+      "enabled": true,
+      "punishment": "ban"
+    },
+    "antiBan": {
+      "enabled": true
+    },
+    "antiKick": {
+      "enabled": true,
+      "punishment": "ban"
+    },
+    "antiPrune": {
+      "enabled": true,
+      "punishment": "ban"
+    },
+    "antiEmojiDelete": {
+      "enabled": true,
+      "punishment": "timeout",
+      "duration": 300000
+    },
+    "antiEmojiCreate": {
+      "enabled": true,
+      "punishment": "timeout",
+      "duration": 300000
+    },
+    "antiStickerDelete": {
+      "enabled": true,
+      "punishment": "timeout",
+      "duration": 300000
+    },
+    "antiStickerCreate": {
+      "enabled": true,
+      "punishment": "timeout",
+      "duration": 300000
+    },
+    "antiIntegration": {
+      "enabled": true,
+      "punishment": "ban"
+    },
+    "antiVanity": {
+      "enabled": true,
+      "punishment": "ban"
+    },
+    "antiAlts": {
+      "enabled": true,
+      "maxAge": 7,
+      "punishment": "kick"
+    },
+    "antiToxic": {
+      "enabled": true,
+      "words": [],
+      "punishment": "timeout",
+      "duration": 300000
+    },
+    "antiCapslock": {
+      "enabled": true,
+      "minLength": 10,
+      "capPercent": 70,
+      "punishment": "timeout",
+      "duration": 60000
+    },
+    "antiMassMention": {
+      "enabled": true,
+      "maxMentions": 5,
+      "punishment": "timeout",
+      "duration": 300000
+    },
+    "antiFlood": {
+      "enabled": true,
+      "maxRepeats": 3,
+      "timeWindow": 5000,
+      "punishment": "timeout",
+      "duration": 300000
+    },
+    "antiInvite": {
+      "enabled": true,
+      "whitelistedGuilds": [],
+      "punishment": "timeout",
+      "duration": 300000
+    },
+    "antiGhostPing": {
+      "enabled": true,
+      "punishment": "timeout",
+      "duration": 300000
+    },
+    "antiMassBan": {
+      "enabled": true,
+      "maxBans": 3,
+      "timeWindow": 5000,
+      "punishment": "ban"
+    },
+    "antiMassKick": {
+      "enabled": true,
+      "maxKicks": 3,
+      "timeWindow": 5000,
+      "punishment": "ban"
+    },
+    "antiPermissionGuard": {
+      "enabled": true,
+      "punishment": "ban"
+    }
+  },
+  "logs": [
+    {
+      "type": "backup",
+      "userId": "system",
+      "action": "Backup created for !𝐌𝐨𝐡𝐚𝐦𝐦𝐞𝐝's server - 6 channels, 2 roles",
+      "details": {
+        "timestamp": 1781188906201
+      },
+      "timestamp": 1781188906201
+    },
+    {
+      "type": "backup",
+      "userId": "system",
+      "action": "Backup created for !𝐌𝐨𝐡𝐚𝐦𝐦𝐞𝐝's server - 6 channels, 2 roles",
+      "details": {
+        "timestamp": 1781187146859
+      },
+      "timestamp": 1781187146859
+    },
+    {
+      "type": "antiInvite",
+      "userId": "system",
+      "action": "⚠ Invite blocked from .m11.: !𝐌𝐨𝐡𝐚𝐦𝐦𝐞𝐝's server",
+      "details": {
+        "timestamp": 1781186946445
+      },
+      "timestamp": 1781186946445
+    },
+    {
+      "type": "antiFlood",
+      "userId": "system",
+      "action": "⚠ Flood from .m11.: repeated 6x",
+      "details": {
+        "timestamp": 1781186946238
+      },
+      "timestamp": 1781186946238
+    },
+    {
+      "type": "antiLink",
+      "userId": "system",
+      "action": "⚠ Link blocked from .m11.: discord.gg",
+      "details": {
+        "timestamp": 1781186945980
+      },
+      "timestamp": 1781186945980
+    },
+    {
+      "type": "antiInvite",
+      "userId": "system",
+      "action": "⚠ Invite blocked from .m11.: !𝐌𝐨𝐡𝐚𝐦𝐦𝐞𝐝's server",
+      "details": {
+        "timestamp": 1781186945657
+      },
+      "timestamp": 1781186945658
+    },
+    {
+      "type": "antiFlood",
+      "userId": "system",
+      "action": "⚠ Flood from .m11.: repeated 5x",
+      "details": {
+        "timestamp": 1781186940901
+      },
+      "timestamp": 1781186940901
+    },
+    {
+      "type": "antiFlood",
+      "userId": "system",
+      "action": "⚠ Flood from .m11.: repeated 4x",
+      "details": {
+        "timestamp": 1781186940762
+      },
+      "timestamp": 1781186940762
+    },
+    {
+      "type": "antiLink",
+      "userId": "system",
+      "action": "⚠ Link blocked from .m11.: discord.gg",
+      "details": {
+        "timestamp": 1781186940680
+      },
+      "timestamp": 1781186940680
+    },
+    {
+      "type": "antiLink",
+      "userId": "system",
+      "action": "⚠ Link blocked from .m11.: discord.gg",
+      "details": {
+        "timestamp": 1781186940456
+      },
+      "timestamp": 1781186940456
+    },
+    {
+      "type": "antiInvite",
+      "userId": "system",
+      "action": "⚠ Invite blocked from .m11.: !𝐌𝐨𝐡𝐚𝐦𝐦𝐞𝐝's server",
+      "details": {
+        "timestamp": 1781186939695
+      },
+      "timestamp": 1781186939695
+    },
+    {
+      "type": "antiInvite",
+      "userId": "system",
+      "action": "⚠ Invite blocked from .m11.: !𝐌𝐨𝐡𝐚𝐦𝐦𝐞𝐝's server",
+      "details": {
+        "timestamp": 1781186935622
+      },
+      "timestamp": 1781186935624
+    },
+    {
+      "type": "antiLink",
+      "userId": "system",
+      "action": "⚠ Link blocked from .m11.: discord.gg",
+      "details": {
+        "timestamp": 1781186934918
+      },
+      "timestamp": 1781186934918
+    },
+    {
+      "type": "antiInvite",
+      "userId": "system",
+      "action": "⚠ Invite blocked from .m11.: !𝐌𝐨𝐡𝐚𝐦𝐦𝐞𝐝's server",
+      "details": {
+        "timestamp": 1781186934623
+      },
+      "timestamp": 1781186934623
+    },
+    {
+      "type": "antiInvite",
+      "userId": "system",
+      "action": "⚠ Invite blocked from .m11.: !𝐌𝐨𝐡𝐚𝐦𝐦𝐞𝐝's server",
+      "details": {
+        "timestamp": 1781186934411
+      },
+      "timestamp": 1781186934411
+    },
+    {
+      "type": "antiLink",
+      "userId": "system",
+      "action": "⚠ Link blocked from .m11.: discord.gg",
+      "details": {
+        "timestamp": 1781186934151
+      },
+      "timestamp": 1781186934151
+    },
+    {
+      "type": "antiInvite",
+      "userId": "system",
+      "action": "⚠ Invite blocked from .m11.: !𝐌𝐨𝐡𝐚𝐦𝐦𝐞𝐝's server",
+      "details": {
+        "timestamp": 1781186933388
+      },
+      "timestamp": 1781186933388
+    },
+    {
+      "type": "antiLink",
+      "userId": "system",
+      "action": "⚠ Link blocked from .m11.: discord.gg",
+      "details": {
+        "timestamp": 1781186933148
+      },
+      "timestamp": 1781186933148
+    },
+    {
+      "type": "antiLink",
+      "userId": "system",
+      "action": "⚠ Link blocked from .m11.: discord.gg",
+      "details": {
+        "timestamp": 1781186932371
+      },
+      "timestamp": 1781186932371
+    },
+    {
+      "type": "antiInvite",
+      "userId": "system",
+      "action": "⚠ Invite blocked from .m11.: !𝐌𝐨𝐡𝐚𝐦𝐦𝐞𝐝's server",
+      "details": {
+        "timestamp": 1781186926517
+      },
+      "timestamp": 1781186926517
+    },
+    {
+      "type": "antiLink",
+      "userId": "system",
+      "action": "⚠ Link blocked from .m11.: discord.gg",
+      "details": {
+        "timestamp": 1781186926003
+      },
+      "timestamp": 1781186926003
+    },
+    {
+      "type": "backup",
+      "userId": "system",
+      "action": "Backup created for !𝐌𝐨𝐡𝐚𝐦𝐦𝐞𝐝's server - 6 channels, 2 roles",
+      "details": {
+        "timestamp": 1781186753726
+      },
+      "timestamp": 1781186753726
+    },
+    {
+      "type": "dashboard",
+      "userId": "system",
+      "action": "all enabled by Admin",
+      "details": {
+        "timestamp": 1781186748841
+      },
+      "timestamp": 1781186748842
+    },
+    {
+      "type": "dashboard",
+      "userId": "system",
+      "action": "👹 Beast mode activated by Admin",
+      "details": {
+        "timestamp": 1781186742381
+      },
+      "timestamp": 1781186742381
+    },
+    {
+      "type": "dashboard",
+      "userId": "system",
+      "action": "👹 Beast mode activated by Admin",
+      "details": {
+        "timestamp": 1781186730099
+      },
+      "timestamp": 1781186730103
+    },
+    {
+      "type": "backup",
+      "userId": "system",
+      "action": "Backup created for !𝐌𝐨𝐡𝐚𝐦𝐦𝐞𝐝's server - 6 channels, 2 roles",
+      "details": {
+        "timestamp": 1781186703172
+      },
+      "timestamp": 1781186703172
+    },
+    {
+      "type": "dashboard",
+      "userId": "system",
+      "action": "👹 Beast mode activated by Admin",
+      "details": {
+        "timestamp": 1781186481651
+      },
+      "timestamp": 1781186481651
+    },
+    {
+      "type": "dashboard",
+      "userId": "system",
+      "action": "👹 Beast mode activated by Admin",
+      "details": {
+        "timestamp": 1781186477957
+      },
+      "timestamp": 1781186477957
+    },
+    {
+      "type": "backup",
+      "userId": "system",
+      "action": "Backup created for !𝐌𝐨𝐡𝐚𝐦𝐦𝐞𝐝's server - 6 channels, 2 roles",
+      "details": {
+        "timestamp": 1781186432796
+      },
+      "timestamp": 1781186432796
+    },
+    {
+      "type": "dashboard",
+      "userId": "system",
+      "action": "antiWebhook enabled by Admin",
+      "details": {
+        "timestamp": 1781186263314
+      },
+      "timestamp": 1781186263314
+    },
+    {
+      "type": "dashboard",
+      "userId": "system",
+      "action": "antiWebhook disabled by Admin",
+      "details": {
+        "timestamp": 1781186262807
+      },
+      "timestamp": 1781186262807
+    },
+    {
+      "type": "dashboard",
+      "userId": "system",
+      "action": "👹 Beast mode activated by Admin",
+      "details": {
+        "timestamp": 1781186198793
+      },
+      "timestamp": 1781186198794
+    },
+    {
+      "type": "backup",
+      "userId": "system",
+      "action": "Backup created for !𝐌𝐨𝐡𝐚𝐦𝐦𝐞𝐝's server - 6 channels, 2 roles",
+      "details": {
+        "timestamp": 1781185774338
+      },
+      "timestamp": 1781185774338
+    },
+    {
+      "type": "backup",
+      "userId": "system",
+      "action": "Backup created for !𝐌𝐨𝐡𝐚𝐦𝐦𝐞𝐝's server - 6 channels, 2 roles",
+      "details": {
+        "timestamp": 1781185512415
+      },
+      "timestamp": 1781185512416
+    },
+    {
+      "type": "antiChannelCreate",
+      "userId": "system",
+      "action": "⚠ .10.2 created #〔👋〕〡𝖲𝐭𝐨𝐫𝐞・𝐬𝐞𝐫𝐯𝐢𝐜𝐞𝐬 - deleted & punished",
+      "details": {
+        "timestamp": 1781185265531
+      },
+      "timestamp": 1781185265531
+    },
+    {
+      "type": "punishment",
+      "userId": "1150887802444189838",
+      "action": "BAN",
+      "details": "Unauthorized channel creation: 〔👋〕〡𝖲𝐭𝐨𝐫𝐞・𝐬𝐞𝐫𝐯𝐢𝐜𝐞𝐬",
+      "timestamp": 1781185265529
+    },
+    {
+      "type": "dashboard",
+      "userId": "system",
+      "action": "all enabled by Admin",
+      "details": {
+        "timestamp": 1781185239156
+      },
+      "timestamp": 1781185239156
+    },
+    {
+      "type": "backup",
+      "userId": "system",
+      "action": "Backup created for !𝐌𝐨𝐡𝐚𝐦𝐦𝐞𝐝's server - 6 channels, 2 roles",
+      "details": {
+        "timestamp": 1781185174298
+      },
+      "timestamp": 1781185174299
+    }
+  ],
+  "backup": {
+    "channels": [
+      {
+        "id": "1509316521128890458",
+        "name": "Text Channels",
+        "type": 4,
+        "parent": null,
+        "position": 0,
+        "permissionOverwrites": []
+      },
+      {
+        "id": "1509316521128890459",
+        "name": "Voice Channels",
+        "type": 4,
+        "parent": null,
+        "position": 1,
+        "permissionOverwrites": []
+      },
+      {
+        "id": "1509316521128890460",
+        "name": "general",
+        "type": 0,
+        "topic": null,
+        "nsfw": false,
+        "rateLimitPerUser": 0,
+        "parent": "1509316521128890458",
+        "position": 0,
+        "permissionOverwrites": []
+      },
+      {
+        "id": "1509316521128890461",
+        "name": "General",
+        "type": 2,
+        "nsfw": false,
+        "bitrate": 64000,
+        "userLimit": 0,
+        "rateLimitPerUser": 0,
+        "parent": "1509316521128890459",
+        "position": 0,
+        "permissionOverwrites": []
+      },
+      {
+        "id": "1514276466236461160",
+        "name": "〔🔴〕〡・m11",
+        "type": 0,
+        "topic": "User: 1417450379867586702|Category: programming|Created: 1781102037866",
+        "nsfw": false,
+        "rateLimitPerUser": 0,
+        "parent": "1509316521128890459",
+        "position": 0,
+        "permissionOverwrites": [
+          {
+            "id": "1514056575474729000",
+            "type": 0,
+            "allow": [
+              "ViewChannel",
+              "SendMessages",
+              "ManageMessages",
+              "AttachFiles",
+              "ReadMessageHistory"
+            ],
+            "deny": []
+          },
+          {
+            "id": "1509316520344551566",
+            "type": 0,
+            "allow": [],
+            "deny": [
+              "ViewChannel"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "1514376798895603734",
+        "name": "〔👋〕〡𝖲𝐭𝐨𝐫𝐞・𝐬𝐞𝐫𝐯𝐢𝐜𝐞𝐬",
+        "type": 0,
+        "topic": null,
+        "nsfw": false,
+        "rateLimitPerUser": 0,
+        "parent": "1509316521128890458",
+        "position": 1,
+        "permissionOverwrites": []
+      }
+    ],
+    "roles": [
+      {
+        "id": "1514056575474729000",
+        "name": "1111111111111111111111111111111",
+        "color": 0,
+        "hoist": false,
+        "position": 1,
+        "permissions": [
+          "Administrator"
+        ],
+        "mentionable": false,
+        "icon": null
+      },
+      {
+        "id": "1514397435185598518",
+        "name": "TST BOE",
+        "color": 0,
+        "hoist": false,
+        "position": 2,
+        "permissions": [
+          "Administrator"
+        ],
+        "mentionable": false,
+        "icon": null
+      }
+    ],
+    "timestamp": 1781190106225
+  }
+}
